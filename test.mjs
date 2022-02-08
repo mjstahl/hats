@@ -10,7 +10,7 @@ test('hide if data-show-if is false', t => {
   <div data-content="last">Stahl</div>
   `;
   const result = render(template, { last: 'Stahl' });
-  t.is(result, expected.trim());
+  t.is(result.trim(), expected.trim());
 });
 
 test('render show-if and then content', t => {
@@ -23,7 +23,7 @@ test('render show-if and then content', t => {
   <div data-content="last">Stahl</div>
   `;
   const result = render(template, { first: 'Mark', last: 'Stahl' });
-  t.is(result, expected.trim());
+  t.is(result.trim(), expected.trim());
 });
 
 test('show data-hide-if if false', t => {
@@ -36,7 +36,7 @@ test('show data-hide-if if false', t => {
   <div data-content="last">Stahl</div>
   `;
   const result = render(template, { last: 'Stahl' });
-  t.is(result, expected.trim());
+  t.is(result.trim(), expected.trim());
 });
 
 test('remove data-hide-if if true', t => {
@@ -48,7 +48,7 @@ test('remove data-hide-if if true', t => {
   <div data-content="last">Stahl</div>
   `;
   const result = render(template, { last: 'Stahl' });
-  t.is(result, expected.trim());
+  t.is(result.trim(), expected.trim());
 });
 
 test('render data-content', t => {
@@ -61,5 +61,5 @@ test('render data-content', t => {
   <div data-content="last">Stahl</div>
   `;
   const result = render(template, { first: 'Mark', last: 'Stahl' });
-  t.is(result, expected.trim());
+  t.is(result.trim(), expected.trim());
 });

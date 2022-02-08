@@ -27,7 +27,6 @@
     "c8": "^7.11.0"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.10",
-    "jsdom": "^19.0.0"
+    "linkedom": "^0.13.2"
   }
 }

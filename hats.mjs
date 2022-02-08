@@ -1,4 +1,4 @@
-import { JSDOM } from 'jsdom';
+import { parseHTML } from 'linkedom';
 
 // Define the known attributes in an array to maintain
 // the order of evaluation
@@ -18,30 +18,25 @@ const CALLBACKS = {
   'data-content': content
 }
 
-// Assume we are dealing with DocumentFragments first
-// and because of that we need a way to serialize them
-// which requires a valid document
-const document = (new JSDOM('<html />')).window.document;
-
-function hideIf(selected, data) {
+function hideIf(selected, data, env) {
   selected.forEach(selected => {
     const value = data[selected.dataset['hideIf']];
     if (value) selected.remove();
   });
 }
 
-function showIf(selected, data) {
+function showIf(selected, data, env) {
   selected.forEach(selected => {
     const value = data[selected.dataset['showIf']];
     if (!value) selected.remove();
   });
 }
 
-function content(selected, data) {
+function content(selected, data, env) {
   selected.forEach(selected => {
     const value = data[selected.dataset['content']];
-    // We don't want 'undefined' to be stringified in the DOM
-    // for an undefined property
+    // We don't want 'undefined' (unless it is the string "undefined")
+    // to be stringified in the DOM
     if (value != undefined) {
       selected.innerHTML = value;
     }
@@ -49,12 +44,12 @@ function content(selected, data) {
 }
 
 export function compile(template, environment = {}) {
-  let fragment = JSDOM.fragment(template);
-  return function(data) {
-    ATTRS.forEach(a => CALLBACKS[a](fragment.querySelectorAll(`[${a}]`), data));
-    const div = document.createElement('div');
-    div.appendChild(fragment.cloneNode(true));
-    return div.innerHTML.trim();
+  let { document } = parseHTML(template);
+  return function(data = {}) {
+    ATTRS.forEach(a => {
+      CALLBACKS[a](document.querySelectorAll(`[${a}]`), data, environment)
+    });
+    return document.toString();
   }
 }
 
