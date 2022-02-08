@@ -1,0 +1,32 @@
+{
+  "name": "hats",
+  "version": "0.1.0",
+  "description": "HTML Attribute Templates",
+  "main": "hats.js",
+  "scripts": {
+    "test": "ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mjstahl/hats.git"
+  },
+  "keywords": [
+    "templating",
+    "templates",
+    "html",
+    "javascript"
+  ],
+  "author": "Mark Stahl <mjstahl@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mjstahl/hats/issues"
+  },
+  "homepage": "https://github.com/mjstahl/hats#readme",
+  "devDependencies": {
+    "ava": "^4.0.1"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.10",
+    "jsdom": "^19.0.0"
+  }
+}
