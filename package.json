@@ -4,7 +4,7 @@
   "description": "HTML Attribute Templates",
   "main": "hats.js",
   "scripts": {
-    "test": "ava"
+    "test": "c8 ava"
   },
   "repository": {
     "type": "git",
@@ -23,7 +23,8 @@
   },
   "homepage": "https://github.com/mjstahl/hats#readme",
   "devDependencies": {
-    "ava": "^4.0.1"
+    "ava": "^4.0.1",
+    "c8": "^7.11.0"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.10",

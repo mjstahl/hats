@@ -4,7 +4,7 @@ import { JSDOM } from 'jsdom';
 // the order of evaluation
 const ATTRS = [
   // Show, Hide, and Templates should be rendered first
-  // since they may include other directives that require
+  // since they may include other attributes that require
   // processing
   'data-hide-if',
   'data-show-if',
@@ -21,7 +21,7 @@ const CALLBACKS = {
 // Assume we are dealing with DocumentFragments first
 // and because of that we need a way to serialize them
 // which requires a valid document
-const document = (new JSDOM('<html></html>')).window.document;
+const document = (new JSDOM('<html />')).window.document;
 
 function hideIf(selected, data) {
   selected.forEach(selected => {
