@@ -1,6 +1,75 @@
 import test from 'ava';
 import { render } from './hats.mjs';
 
+test('render data-template', t => {
+  const headerTemplate = `<h1>Header</h1>`;
+  const footerTemplate = `<footer>Footer</footer>`;
+  const bodyTemplate = `
+  <body>
+    <div data-template="header"></div>
+    <div data-template="footer"></div>
+  </body>
+  `;
+  const expected = `
+  <body>
+    <div data-template="header"><h1>Header</h1></div>
+    <div data-template="footer"><footer>Footer</footer></div>
+  </body>
+  `;
+  const env = {
+    templates: {
+      header: headerTemplate,
+      footer: footerTemplate
+    }
+  };
+  const result = render(bodyTemplate, {}, env);
+  t.is(result.trim(), expected.trim());
+});
+
+test('render multiple templates for single element', t => {
+  const headerTemplate = `<h1>Header</h1>`;
+  const footerTemplate = `<footer>Footer</footer>`;
+  const bodyTemplate = `
+  <body>
+    <div data-template="header footer"></div>
+  </body>
+  `;
+  const expected = `
+  <body>
+    <div data-template="header footer"><h1>Header</h1><footer>Footer</footer></div>
+  </body>
+  `;
+  const env = {
+    templates: {
+      header: headerTemplate,
+      footer: footerTemplate
+    }
+  };
+  const result = render(bodyTemplate, {}, env);
+  t.is(result.trim(), expected.trim());
+});
+
+test('render template with content', t => {
+  const nameTemplate = `First Name: <span data-content="first"></span>`
+  const bodyTemplate = `
+  <body>
+    <div data-template="name"></div>
+  </body>
+  `
+  const expected = `
+  <body>
+    <div data-template="name">First Name: <span data-content="first">Mark</span></div>
+  </body>
+  `;
+  const env = {
+    templates: {
+      name: nameTemplate
+    }
+  };
+  const result = render(bodyTemplate, { first: 'Mark' }, env);
+  t.is(result.trim(), expected.trim());
+});
+
 test('hide if data-show-if is false', t => {
   const template = `
   <div data-show-if="undef"></div>
@@ -49,6 +118,24 @@ test('remove data-hide-if if true', t => {
   `;
   const result = render(template, { last: 'Stahl' });
   t.is(result.trim(), expected.trim());
+});
+
+test.skip('render data-each', t => {
+  const template = `
+  <div data-each="numbers">
+  <p>Number<p>
+  </div>
+  `;
+  const expected = `
+  <div data-each="numbers">
+  <p>Number<p>
+  <p>Number</p>
+  </div>
+  `
+});
+
+test.skip('render data-each with data-content', t => {
+  t.pass();
 });
 
 test('render data-content', t => {

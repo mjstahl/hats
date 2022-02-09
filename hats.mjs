@@ -3,47 +3,90 @@ import { parseHTML } from 'linkedom';
 // Define the known attributes in an array to maintain
 // the order of evaluation
 const ATTRS = [
-  // Show, Hide, and Templates should be rendered first
-  // since they may include other attributes that require
-  // processing
-  // TODO 'data-template',
+  // Template is a special as it does not rely on data
+  // values, it only relies on the templates passed into
+  // the environment.
+  // 'data-template',
+
+  // Show, Hide should be rendered after templates but
+  // before each or content since they may include other
+  // attributes that require processing
   'data-hide-if',
   'data-show-if',
 
-  // TODO 'data-each',
+  'data-each',
   'data-content'
 
   // We won't include content-format as it is a special
   // case of content and we shouldn't mutate the DOM
   // until the final (formatted) value is computed
-  // data-content-format
+  // 'data-content-format'
 ];
 
 const CALLBACKS = {
+  'data-template': template,
   'data-hide-if': hideIf,
   'data-show-if': showIf,
+  'data-each': each,
   'data-content': content
+}
+
+// 'data-template="<value> [<value>]*"' will take the template
+// named <value> from the environment and add <value>'s contents
+// as a child of the Element.
+//
+// Multiple templates can be provided as space-seperated names
+// and they will be appended in the order they are specified.
+//
+function template(selected, { templates }) {
+  if (!templates) return;
+  selected.forEach(s => {
+    const template = s.dataset['template'].trim();
+    const children = template.split(' ').map(t => templates[t]);
+    s.innerHTML = children.join('');
+  });
 }
 
 // 'data-hide-if="<value>"' will remove the element if <value>
 // is truthy and show the element if <value> is falsey.
-function hideIf(selected, data, env) {
-  selected.forEach(selected => {
+//
+function hideIf(selected, data) {
+  selected.forEach(s => {
     // Trim any preceding or trailing whitespace before lookup
-    const hideIf = selected.dataset['hideIf'].trim();
+    const hideIf = s.dataset['hideIf'].trim();
     const value = data[hideIf];
-    if (value) selected.remove();
+    if (value) s.remove();
   });
 }
 
 // 'data-show-if="<value>"' will render the element if <value>
 // is truthy and remove the element if <value> is falsey.
-function showIf(selected, data, env) {
-  selected.forEach(selected => {
+//
+function showIf(selected, data) {
+  selected.forEach(s => {
     // Trim any preceding or trailing whitespace before lookup
-    const showIf = selected.dataset['showIf'].trim();
+    const showIf = s.dataset['showIf'].trim();
     const value = data[showIf];
-    if (!value) selected.remove();
+    if (!value) s.remove();
+  });
+}
+
+// 'data-each="<value>"' will use the children of the Element
+// as a template to render each iteration. Both objects and
+// arrays can be iterated over with data-each.
+//
+// The key (index for an array) and value be accessed by
+// 'data-content' using the values 'key' and 'val'.
+//
+function each(selected, data, env) {
+  selected.forEach(s => {
+    const each = s.dataset['each'].trim();
+    const value = data[each];
+
+    // store the child nodes to reset the children
+    // call apply and take remove the mutated child nodes,
+    // replacing them with the stored child nodes
+    s.innerHTML = result;
   });
 }
 
@@ -57,17 +100,18 @@ function showIf(selected, data, env) {
 // In the context of 'data-each' element, 'data-content' can
 // be without a value and that reference the current element
 // of the array.
+//
 function content(selected, data, { formats }) {
-  selected.forEach(selected => {
+  selected.forEach(s => {
     // Trim any preceding or trailing whitespace before lookup
-    const content = selected.dataset['content'].trim();
+    const content = s.dataset['content'].trim();
     const value = data[content];
     // We don't want 'undefined' (unless it is the string "undefined")
     // to be stringified in the DOM
     if (value !== undefined) {
-      const format = selected.dataset['contentFormat'];
+      const format = s.dataset['contentFormat'];
       if (format === undefined || format === '') {
-        selected.innerHTML = value;
+        s.innerHTML = value;
         return;
       }
       // Trim any preceding or trailing whitespace and then split.
@@ -79,19 +123,24 @@ function content(selected, data, { formats }) {
         const formatter = formats && formats[f];
         return (formatter) ? formatter(v) : v;
       }, value);
-      selected.innerHTML = formattedValue;
+      s.innerHTML = formattedValue;
     }
   });
 }
 
+function apply(document, data, environment) {
+  ATTRS.forEach(a => {
+    CALLBACKS[a](document.querySelectorAll(`[${a}]`), data, environment)
+  });
+  return document.toString();
+}
+
 export function compile(template, environment = {}) {
   let { document } = parseHTML(template);
-  return function(data = {}) {
-    ATTRS.forEach(a => {
-      CALLBACKS[a](document.querySelectorAll(`[${a}]`), data, environment)
-    });
-    return document.toString();
-  }
+  // Process all data-template attributes first as it only
+  // requires the environment (not any data)
+  CALLBACKS['data-template'](document.querySelectorAll('[data-template]'), environment);
+  return (data = {}) => apply(document, data, environment);
 }
 
 export function render(html, data, env) {
