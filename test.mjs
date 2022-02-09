@@ -63,3 +63,50 @@ test('render data-content', t => {
   const result = render(template, { first: 'Mark', last: 'Stahl' });
   t.is(result.trim(), expected.trim());
 });
+
+test('format not found', t => {
+  const template = `
+  <div data-content="first" data-content-format="uppercase"></div>
+  `;
+  const expected = `
+  <div data-content="first" data-content-format="uppercase">Mark</div>
+  `;
+
+  const result = render(template, { first: 'Mark'})
+  t.is(result.trim(), expected.trim());
+});
+
+test('single content format', t => {
+  const template = `
+  <div data-content="first" data-content-format="lowercase"></div>
+  `;
+  const expected = `
+  <div data-content="first" data-content-format="lowercase">mark</div>
+  `;
+
+  const env = {
+    formats: {
+      lowercase: (val) => val.toLowerCase()
+    }
+  };
+  const result = render(template, { first: 'Mark'}, env)
+  t.is(result.trim(), expected.trim());
+});
+
+test('more than one content format', t => {
+  const template = `
+  <div data-content="first" data-content-format="uppercase explode"></div>
+  `;
+  const expected = `
+  <div data-content="first" data-content-format="uppercase explode">M A R K</div>
+  `;
+
+  const env = {
+    formats: {
+      uppercase: (val) => val.toUpperCase(),
+      explode: (val) => val.split('').join(' ')
+    }
+  };
+  const result = render(template, { first: 'Mark'}, env)
+  t.is(result.trim(), expected.trim());
+});
